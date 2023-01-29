@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="i18n">
+<file alias="dashboard_fi_FI.qm">/mnt/data/Omat/Development/Dashboard/dashboard/.qm/dashboard_fi_FI.qm</file>
+</qresource>
+</RCC>
