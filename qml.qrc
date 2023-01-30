@@ -2,5 +2,11 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>images/outboard.png</file>
+        <file>images/battery_off.png</file>
+        <file>images/battery_on.png</file>
+        <file>images/oil_pressure_off.png</file>
+        <file>images/oil_pressure_on.png</file>
+        <file>images/temperature_off.png</file>
+        <file>images/temperature_on.png</file>
     </qresource>
 </RCC>
