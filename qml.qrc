@@ -8,5 +8,7 @@
         <file>images/oil_pressure_on.png</file>
         <file>images/temperature_off.png</file>
         <file>images/temperature_on.png</file>
+        <file>images/stop_off.png</file>
+        <file>images/stop_on.png</file>
     </qresource>
 </RCC>
