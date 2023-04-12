@@ -1,7 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import io.vksn.dashboard 1.0
-
+import QtQuick.Extras 1.4
+import QtQuick.Controls.Styles 1.4
 Window {
     Lights {
            id: lights
@@ -92,7 +93,7 @@ Window {
                 x: 500
                 y: 25
                 height: 50
-                width: 100
+                width: 100                
                 fillMode: Image.PreserveAspectFit
 
             }
@@ -129,110 +130,102 @@ Window {
             }
         }
 
-            Rectangle {
-                id: compass_background
-                x: 750
-                y: 5
-                width: 390
-                height: 390
-                radius: width*0.5
-                color: "steelblue"
-                SequentialAnimation on rotation {
-                    running: true
-                    loops: Animation.Infinite
+        Rectangle {
+            id: compass_background
+            x: 750
+            y: 5
+            width: 390
+            height: 390
+            radius: width*0.5
+            color: "steelblue"
+            SequentialAnimation on rotation {
+                running: true
+                loops: Animation.Infinite
 
-                    RotationAnimation {
-                           from: -85
-                           to: 85
-                           duration: 10000
-                    }
-                    RotationAnimation {
-                           from: 85
-                           to: -85
-                           duration: 10000
-                    }
+                RotationAnimation {
+                       from: -85
+                       to: 85
+                       duration: 10000
                 }
-
-
-                Text {
-                    anchors.horizontalCenter: compass_background.horizontalCenter
-                    anchors.top: compass_background.top
-                    anchors.topMargin: 10
-                    font.family: "Helvetica"
-                    font.pixelSize: 50
-                    font.bold: Font.ExtraBold
-                    font.capitalization: Font.AllUppercase
-                    color: "white"
-                    text: "N"
-
-                }
-                Text {
-                    anchors.right: compass_background.right
-                    anchors.verticalCenter: compass_background.verticalCenter
-                    anchors.rightMargin: 10
-                    font.family: "Helvetica"
-                    font.pixelSize: 50
-                    font.bold: Font.ExtraBold
-                    font.capitalization: Font.AllUppercase
-                    color: "white"
-                    text: "E"
-                }
-                Text {
-                    anchors.bottom: compass_background.bottom
-                    anchors.horizontalCenter: compass_background.horizontalCenter
-                    font.family: "Helvetica"
-                    font.pixelSize: 50
-                    font.bold: Font.ExtraBold
-                    font.capitalization: Font.AllUppercase
-                    color: "white"
-                    text: "S"
-                }
-
-                Text {
-                    id: compass_west
-                    anchors.left: compass_background.left
-                    anchors.verticalCenter: compass_background.verticalCenter
-                    anchors.leftMargin: 10
-                    font.family: "Helvetica"
-                    font.pixelSize: 50
-                    font.bold: Font.ExtraBold
-                    font.capitalization: Font.AllUppercase
-                    color: "white"
-                    text: "W"
-                }
-
-
-             }
-
-            Canvas {
-                id: arrow
-                anchors.horizontalCenter:   compass_background.horizontalCenter
-                y: 75
-
-                height: 20
-                width: 50
-
-                antialiasing: true
-
-                onPaint: {
-                    var ctx = arrow.getContext('2d')
-
-                    ctx.strokeStyle = "#000000"
-                    ctx.lineWidth = 6
-                    ctx.beginPath()
-                    ctx.moveTo(arrow.width * 0.05, arrow.height)
-                    ctx.lineTo(arrow.width / 2, arrow.height * 0.1)
-                    ctx.lineTo(arrow.width * 0.95, arrow.height)
-                    ctx.stroke()
+                RotationAnimation {
+                       from: 85
+                       to: -85
+                       duration: 10000
                 }
             }
 
 
+            Text {
+                anchors.horizontalCenter: compass_background.horizontalCenter
+                anchors.top: compass_background.top
+                anchors.topMargin: 10
+                font.family: "Helvetica"
+                font.pixelSize: 50
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "N"
+
+            }
+            Text {
+                anchors.right: compass_background.right
+                anchors.verticalCenter: compass_background.verticalCenter
+                anchors.rightMargin: 10
+                font.family: "Helvetica"
+                font.pixelSize: 50
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "E"
+            }
+            Text {
+                anchors.bottom: compass_background.bottom
+                anchors.horizontalCenter: compass_background.horizontalCenter
+                font.family: "Helvetica"
+                font.pixelSize: 50
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "S"
+            }
+
+            Text {
+                id: compass_west
+                anchors.left: compass_background.left
+                anchors.verticalCenter: compass_background.verticalCenter
+                anchors.leftMargin: 10
+                font.family: "Helvetica"
+                font.pixelSize: 50
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "W"
+            }
 
 
+         }
 
+        Canvas {
+            id: arrow
+            anchors.horizontalCenter:   compass_background.horizontalCenter
+            y: 75
 
+            height: 20
+            width: 50
 
+            antialiasing: true
 
+            onPaint: {
+                var ctx = arrow.getContext('2d')
+
+                ctx.strokeStyle = "#000000"
+                ctx.lineWidth = 6
+                ctx.beginPath()
+                ctx.moveTo(arrow.width * 0.05, arrow.height)
+                ctx.lineTo(arrow.width / 2, arrow.height * 0.1)
+                ctx.lineTo(arrow.width * 0.95, arrow.height)
+                ctx.stroke()
+            }
+        }
     }
 }

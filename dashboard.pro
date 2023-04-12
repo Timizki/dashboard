@@ -36,3 +36,5 @@ DISTFILES += \
 
 HEADERS += \
     lights.h
+
+unix:!macx: LIBS += -lgpiod

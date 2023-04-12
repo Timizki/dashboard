@@ -3,7 +3,7 @@
 
 #include "qqml.h"
 #include <QObject>
-
+#include <gpiod.h>
 
 class Lights : public QObject
 {
@@ -14,6 +14,8 @@ class Lights : public QObject
     Q_PROPERTY(bool oilPressureState READ oilPressure WRITE setOilPressureState NOTIFY oilPressureStateChanged)
     Q_PROPERTY(bool batteryState READ battery WRITE setBatteryState NOTIFY batteryStateChanged)
     QML_ELEMENT
+
+
 
 signals:
     void stopStateChanged() ;
@@ -29,6 +31,8 @@ signals:
 
 public:
     explicit Lights(QObject *parent = nullptr);
+    ~Lights();
+
     bool stop();
     bool temperature();
     bool oilPressure();
@@ -44,6 +48,14 @@ private:
     bool temperatureState = false;
     bool oilPressureState = false;
     bool batteryState = false;
+
+    const char *chipname = "gpiochip0";
+    struct gpiod_chip *chip;
+    struct gpiod_line *lineStop;
+    struct gpiod_line *lineTemperature;
+    struct gpiod_line *lineOilPressure;
+    struct gpiod_line *lineBattery;
+
 
 };
 

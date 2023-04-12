@@ -13,12 +13,7 @@ int main(int argc, char *argv[])
 #endif    
     qputenv("QT_ASSUME_STDERR_HAS_CONSOLE", "1");
     QGuiApplication app(argc, argv);
-    QLoggingCategory qlc("sdf") ;
-    if(qlc.isDebugEnabled()) {
-        qlc.setEnabled(QtMsgType::QtDebugMsg, true);
-        qDebug("sd");
 
-    }
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
@@ -37,7 +32,6 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
-qInfo()<< "siduuu";
 
     return app.exec();
 }
