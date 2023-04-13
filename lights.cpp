@@ -8,10 +8,10 @@ Lights::Lights(QObject *parent)
 
     this->chip = gpiod_chip_open_by_name(chipname);
 
-    this->lineStop = gpiod_chip_get_line(this->chip, 11);
-    this->lineTemperature = gpiod_chip_get_line(this->chip, 12);
-    this->lineOilPressure = gpiod_chip_get_line(this->chip, 13);
-    this->lineBattery = gpiod_chip_get_line(this->chip, 16);
+    this->lineStop = gpiod_chip_get_line(this->chip, 17);
+    this->lineTemperature = gpiod_chip_get_line(this->chip, 27);
+    this->lineOilPressure = gpiod_chip_get_line(this->chip, 22);
+    this->lineBattery = gpiod_chip_get_line(this->chip, 23);
 
 
     gpiod_line_request_input(this->lineStop, "dashboard");
@@ -104,32 +104,21 @@ int readPin(gpiod_line* line)
 
 void Lights::updateStopLight()
 {
-    if(readPin(Lights::lineStop) == 1)
-        setStopState(false);
-    else
-        setStopState(true);
+    setStopState(readPin(Lights::lineStop));
 }
 
 void Lights::updateOilPressureLight()
 {
-    if(readPin(Lights::lineOilPressure) == 1)
-        setOilPressureState(false);
-    else
-        setOilPressureState(true);
+    setOilPressureState(readPin(Lights::lineOilPressure));
 }
 
 void Lights::updateTemperatureLight()
 {
-    if(readPin(Lights::lineTemperature) == 1)
-        setTemperatureState(false);
-    else
-        setTemperatureState(true);
+    setTemperatureState(readPin(Lights::lineTemperature));
+
 }
 
 void Lights:: updateBatteryLight()
 {
-    if(readPin(Lights::lineBattery) == 1)
-        setBatteryState(false);
-    else
-        setBatteryState(true);
+    setBatteryState(readPin(Lights::lineBattery));
 }
