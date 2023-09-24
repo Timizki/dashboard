@@ -1,4 +1,4 @@
-QT += quick
+QT += quick serialport
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -6,7 +6,8 @@ QT += quick
 
 SOURCES += \
         lights.cpp \
-        main.cpp
+        main.cpp \
+        rpm.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,6 +36,7 @@ DISTFILES += \
     images/outboard.png
 
 HEADERS += \
-    lights.h
+    lights.h \
+    rpm.h
 
 unix:!macx: LIBS += -lgpiod

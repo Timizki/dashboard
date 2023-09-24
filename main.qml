@@ -7,6 +7,14 @@ Window {
     Lights {
            id: lights
        }
+    RPM {
+        id: rpmConn;
+    }
+    function onSignalRPMUpdate() {
+                console.log("Received data:",  rpmConn.rpm);
+            rpm.text = rpmConn.rpm;
+     }
+
 
     id: dash
     width: 1280
@@ -15,7 +23,7 @@ Window {
     title: qsTr("Dashboard")
 
     Rectangle {
-
+        id: container
         anchors.fill: parent
         color: "black"
         focus: true
@@ -38,7 +46,8 @@ Window {
             source: "images/outboard.png"
             height: 300
             width: 250
-            x: 100
+            anchors.left: container.left
+            anchors.leftMargin: 55
             y: 50
             fillMode: Image.PreserveAspectFit
             transformOrigin: Item.TopRight
@@ -85,54 +94,71 @@ Window {
             duration: 1000
         }
 
+
         Rectangle {
             id: lightsContainer
+            anchors.left: container.horizontalCenter
+            Text {
+                id: rpm
+                text: rpmConn.rpm
+                color: "white"
+                font.family: "Helvetica"
+                font.pixelSize: 50
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                anchors.horizontalCenter:  lightsContainer.horizontalCenter
+                y: 25
+
+
+            }
+
             Image {
                 id: stop
-                source: lights.stopState ? "images/stop_on.png" : "images/stop_off.png"
-                x: 500
-                y: 25
+                source: lights.stopState ? "images/stop_on.png" : "images/stop_off.png"                
+                y: 100
                 height: 50
                 width: 100                
                 fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter:  lightsContainer.horizontalCenter
 
             }
 
             Image {
                 id: temperature
                 source: lights.temperatureState ? "images/temperature_on.png" : "images/temperature_off.png"
-                x: 500
-                y: 125
+                y: 175
                 height: 50
                 width: 100
                 fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter:  lightsContainer.horizontalCenter
             }
 
             Image {
                 id: oil_pressure
                 source: lights.oilPressureState ? "images/oil_pressure_on.png" : "images/oil_pressure_off.png"
-                x: 500
-                y: 225
+                y: 250
                 height: 50
                 width: 100
                 fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter:  lightsContainer.horizontalCenter
 
             }
 
             Image {
                 id: battery
                 source: lights.batteryState ? "images/battery_on.png" : "images/battery_off.png"
-                x: 500
                 y: 325
                 height: 50
                 width: 100
                 fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter:  lightsContainer.horizontalCenter
             }
         }
 
         Rectangle {
             id: compass_background
-            x: 750
+            anchors.right: container.right;
+            anchors.rightMargin: 55
             y: 5
             width: 390
             height: 390
@@ -227,5 +253,6 @@ Window {
                 ctx.stroke()
             }
         }
+
     }
 }

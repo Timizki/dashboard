@@ -3,7 +3,7 @@
 
 #include "qqml.h"
 #include <QObject>
-#include <gpiod.h>
+//#include <gpiod.h>
 
 class Lights : public QObject
 {
