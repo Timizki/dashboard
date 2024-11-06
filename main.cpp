@@ -5,13 +5,18 @@
 #include <QTranslator>
 #include "QDebug"
 #include <QLoggingCategory>
+#include "rpm.h"
+#include "lights.h"
 
 int main(int argc, char *argv[])
-{    
+{
+    qmlRegisterType<RPM>("io.vksn.dashboard", 1, 0, "RPM");
+    qmlRegisterType<Lights>("io.vksn.dashboard", 1, 0, "Lights");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif    
     qputenv("QT_ASSUME_STDERR_HAS_CONSOLE", "1");
+
     QGuiApplication app(argc, argv);
 
     QTranslator translator;

@@ -4,6 +4,7 @@
 #include "qqml.h"
 #include <QObject>
 #include <QSerialPort>
+
 class RPM : public QObject
 {
     Q_OBJECT
