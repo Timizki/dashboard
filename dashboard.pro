@@ -16,7 +16,7 @@ INCLUDEPATH += .
 # Input
 HEADERS += lights.h rpm.h
 SOURCES += lights.cpp main.cpp rpm.cpp
-RESOURCES += qmake_qmake_qm_files.qrc qml.qrc
+RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts
 QT += qml serialport
-
+LIBS += -lgpiod
