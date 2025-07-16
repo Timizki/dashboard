@@ -9,7 +9,7 @@
 class TEMP : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(float temp READ getTEMP WRITE setTEMP NOTIFY signalTEMPUpdate)
+    Q_PROPERTY(QString temp READ getTEMP WRITE setTEMP NOTIFY signalTEMPUpdate)
     QML_ELEMENT
 
 signals:
