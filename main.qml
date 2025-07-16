@@ -10,11 +10,19 @@ Window {
     RPM {
         id: rpmConn;
     }
+
+    TEMP_INTAKE {
+        id: intakeTemp;
+    }
+
     function onSignalRPMUpdate() {
                 console.log("Received data:",  rpmConn.rpm);
             rpm.text = rpmConn.rpm;
      }
-
+    function onSignalTEMPUpdate() {
+        console.log("Received temp:",  intakeTemp.temp);
+        intake.text = intakeTemp.temp;
+    }
 
     id: dash
     width: 1280
@@ -156,103 +164,69 @@ Window {
         }
 
         Rectangle {
-            id: compass_background
+            id: rpmGauge
             anchors.right: container.right;
             anchors.rightMargin: 55
             y: 5
             width: 390
             height: 390
             radius: width*0.5
-            color: "steelblue"
-            SequentialAnimation on rotation {
-                running: true
-                loops: Animation.Infinite
+            color: "steelblue"            
 
-                RotationAnimation {
-                       from: -85
-                       to: 85
-                       duration: 10000
-                }
-                RotationAnimation {
-                       from: 85
-                       to: -85
-                       duration: 10000
-                }
+            Text {
+                id: label_outlet
+                anchors.right: rpmGauge.right
+                anchors.verticalCenter: rpmGauge.verticalCenter
+                anchors.rightMargin: 50
+                font.family: "Helvetica"
+                font.pixelSize: 12
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "Housing"
+            }
+            Text {
+                id: outlet
+                anchors.verticalCenter: label_outlet.verticalCenter
+                anchors.horizontalCenter: label_outlet.horizontalCenter
+                anchors.top: label_outlet.bottom
+                font.family: "Helvetica"
+                font.pixelSize: 25
+                font.bold: Font.ExtraBold
+                font.capitalization: Font.AllUppercase
+                color: "white"
+                text: "50"
             }
 
 
             Text {
-                anchors.horizontalCenter: compass_background.horizontalCenter
-                anchors.top: compass_background.top
-                anchors.topMargin: 10
+                id: label_intake
+                anchors.left: rpmGauge.left
+                anchors.verticalCenter: rpmGauge.verticalCenter
+                anchors.leftMargin: 50
                 font.family: "Helvetica"
-                font.pixelSize: 50
+                font.pixelSize: 12
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: "N"
-
+                text: "Intake"
             }
             Text {
-                anchors.right: compass_background.right
-                anchors.verticalCenter: compass_background.verticalCenter
-                anchors.rightMargin: 10
+                id: intake
+                anchors.verticalCenter: label_intake.verticalCenter
+                anchors.horizontalCenter: label_intake.horizontalCenter
+                anchors.top: label_intake.bottom
                 font.family: "Helvetica"
-                font.pixelSize: 50
+                font.pixelSize: 25
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: "E"
-            }
-            Text {
-                anchors.bottom: compass_background.bottom
-                anchors.horizontalCenter: compass_background.horizontalCenter
-                font.family: "Helvetica"
-                font.pixelSize: 50
-                font.bold: Font.ExtraBold
-                font.capitalization: Font.AllUppercase
-                color: "white"
-                text: "S"
-            }
-
-            Text {
-                id: compass_west
-                anchors.left: compass_background.left
-                anchors.verticalCenter: compass_background.verticalCenter
-                anchors.leftMargin: 10
-                font.family: "Helvetica"
-                font.pixelSize: 50
-                font.bold: Font.ExtraBold
-                font.capitalization: Font.AllUppercase
-                color: "white"
-                text: "W"
+                text: "25"
             }
 
 
          }
 
-        Canvas {
-            id: arrow
-            anchors.horizontalCenter:   compass_background.horizontalCenter
-            y: 75
-
-            height: 20
-            width: 50
-
-            antialiasing: true
-
-            onPaint: {
-                var ctx = arrow.getContext('2d')
-
-                ctx.strokeStyle = "#000000"
-                ctx.lineWidth = 6
-                ctx.beginPath()
-                ctx.moveTo(arrow.width * 0.05, arrow.height)
-                ctx.lineTo(arrow.width / 2, arrow.height * 0.1)
-                ctx.lineTo(arrow.width * 0.95, arrow.height)
-                ctx.stroke()
-            }
-        }
 
     }
 }

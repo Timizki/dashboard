@@ -14,9 +14,13 @@ INCLUDEPATH += .
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += lights.h rpm.h
-SOURCES += lights.cpp main.cpp rpm.cpp
-RESOURCES += qmake_qmake_qm_files.qrc qml.qrc
+HEADERS += lights.h rpm.h \
+    DS18B20.h \
+    temp.h
+SOURCES += lights.cpp main.cpp rpm.cpp \
+    DS18B20.cpp \
+    temp.cpp
+RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts
 QT += qml serialport
 
