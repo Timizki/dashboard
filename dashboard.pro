@@ -15,10 +15,8 @@ INCLUDEPATH += .
 
 # Input
 HEADERS += lights.h rpm.h \
-    DS18B20.h \
     temp.h
 SOURCES += lights.cpp main.cpp rpm.cpp \
-    DS18B20.cpp \
     temp.cpp
 RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts

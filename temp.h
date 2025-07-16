@@ -3,8 +3,8 @@
 
 #include "qqml.h"
 #include <QObject>
+#include <QFile>
 #include <QSerialPort>
-#include "DS18B20.h"
 
 class TEMP : public QObject
 {
@@ -23,11 +23,11 @@ public:
     explicit TEMP(QObject *parent = nullptr);
     ~TEMP();
 
-    float getTEMP();
-    void setTEMP(int TEMP);
+    QString getTEMP();
+    void setTEMP(QString TEMP);
 
 private:
-    int temp = 0;
-    DS18B20 *tempSensor;
+    QString temp = QString::number(0, 'f', 2) + " °C";
+    QFile temperature = QFile("/sys/bus/w1/devices/28-01193a3eb5b5/w1_slave");
 };
 #endif // TEMP_H
