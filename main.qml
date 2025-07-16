@@ -25,17 +25,21 @@ Window {
     }
 
     id: dash
-    width: 1280
-    height: 400
+    width: 400 
+    height: 1280
+    
     visible: true
     title: qsTr("Dashboard")
-
     Rectangle {
         id: container
-        anchors.fill: parent
-        color: "black"
+      	
+	anchors.centerIn: parent
+        rotation: 90
+        transformOrigin: Item.Center
+        width: parent.height
+	height: parent.width  
+	color: "black"
         focus: true
-
         Keys.onLeftPressed: {
             down_trim.stop()
             up_trim.start()
@@ -230,3 +234,5 @@ Window {
 
     }
 }
+
+

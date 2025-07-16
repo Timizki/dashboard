@@ -23,4 +23,4 @@ SOURCES += lights.cpp main.cpp rpm.cpp \
 RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts
 QT += qml serialport
-
+LIBS += -lgpiod
