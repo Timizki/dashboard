@@ -1,5 +1,6 @@
 #include "temp.h"
 #include <QDebug>
+#include "QTimer"
 
 TEMP::TEMP(QObject *parent)
     : QObject{parent}
@@ -22,6 +23,10 @@ TEMP::TEMP(QObject *parent)
         }
            qDebug() << "NO temp data received";
     });
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this,  &TEMP::updateTEMP);
+    timer->start(1000);
 }
 
 TEMP::~TEMP()

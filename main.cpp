@@ -12,7 +12,6 @@
 int main(int argc, char *argv[])
 {
     qmlRegisterType<TEMP>("io.vksn.dashboard", 1, 0, "TEMP_INTAKE");
-    qmlRegisterType<TEMP>("io.vksn.dashboard", 1, 0, "TEMP_HOUSING");
     qmlRegisterType<RPM>("io.vksn.dashboard", 1, 0, "RPM");
     qmlRegisterType<Lights>("io.vksn.dashboard", 1, 0, "Lights");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
