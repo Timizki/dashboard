@@ -43,6 +43,9 @@ void TEMP::setTEMP(QString temp)
 void TEMP::setSensorId(QString sensorId) {
     TEMP::sensorId = sensorId;
 }
+QString TEMP::getSensorId() {
+    return TEMP::sensorId;
+}
 
 QString TEMP::readTEMP() {
     QFile file("/sys/bus/w1/devices/"+ TEMP::getSensorId() +"/w1_slave");
