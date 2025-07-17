@@ -27,7 +27,7 @@ public:
     QString getTEMP();
     void setTEMP(QString TEMP);
     QString getSensorId();
-    QString setSensorId();
+    void setSensorId(QString sensorId);
 
 private:
     QString temp;

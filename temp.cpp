@@ -12,6 +12,7 @@ TEMP::~TEMP()
 {
     qDebug() << "Cleaning up";
 }
+
 QString TEMP::getTEMP()
 {
     QFile file("/sys/bus/w1/devices/28-01193a3eb5b5/w1_slave"); // Vaihda oikeaan ID:hen
@@ -30,12 +31,17 @@ QString TEMP::getTEMP()
     }
     return "Invalid data";
 }
+
 void TEMP::setTEMP(QString temp)
 {
     TEMP::temp= temp;
     qDebug() <<"Setting temp " << temp;
     emit TEMP::signalTEMPUpdate();
 
+}
+
+void TEMP::setSensorId(QString sensorId) {
+    TEMP::sensorId = sensorId;
 }
 
 QString TEMP::readTEMP() {
