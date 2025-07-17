@@ -15,6 +15,7 @@ class TEMP : public QObject
 
 signals:
     void signalTEMPUpdate();
+    void signalSensorIdChanged();
 
 public slots:
     void updateTEMP();
