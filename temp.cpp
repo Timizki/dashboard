@@ -59,8 +59,8 @@ void TEMP::setTEMP(QString temp)
 
 }
 
-QString readTEMP() {
-    QFile file("/sys/bus/w1/devices/28-01193a3eb5b5/w1_slave"); // Vaihda oikeaan ID:hen
+QString TEMP::readTEMP() {
+    QFile file("/sys/bus/w1/devices/"+ TEMP::getSensorId() +"/w1_slave");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return "Error";
 
@@ -80,5 +80,4 @@ QString readTEMP() {
 void TEMP::updateTEMP()
 {
     setTEMP(readTEMP());
-
 }

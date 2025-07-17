@@ -13,15 +13,12 @@ Window {
 
     TEMP_INTAKE {
         id: intakeTemp;
+        sensorId: "28-01193a3eb5b5";
     }
 
     function onSignalRPMUpdate() {
                 console.log("Received data:",  rpmConn.rpm);
             rpm.text = rpmConn.rpm;
-     }
-    function onSignalTEMPUpdate() {
-        console.log("Received temp:",  intakeTemp.temp);
-        intake.text = intakeTemp.temp;
     }
 
     id: dash
@@ -225,7 +222,7 @@ Window {
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: "25"
+                text: intakeTemp.temp
             }
 
 

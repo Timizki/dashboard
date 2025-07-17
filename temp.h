@@ -10,6 +10,7 @@ class TEMP : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString temp READ getTEMP WRITE setTEMP NOTIFY signalTEMPUpdate)
+    Q_PROPERTY(QString sensorId READ getSensorId WRITE setSensorId NOTIFY signalSensorIdChanged)
     QML_ELEMENT
 
 signals:
@@ -18,16 +19,19 @@ signals:
 public slots:
     void updateTEMP();
 
-
 public:
     explicit TEMP(QObject *parent = nullptr);
     ~TEMP();
 
     QString getTEMP();
     void setTEMP(QString TEMP);
+    QString getSensorId();
+    QString setSensorId();
 
 private:
-    QString temp = QString::number(0, 'f', 2) + " °C";
-    QFile temperature = QFile("/sys/bus/w1/devices/28-01193a3eb5b5/w1_slave");
+    QString temp;
+    QString sensorId;
+    QString readTEMP();
+
 };
 #endif // TEMP_H
