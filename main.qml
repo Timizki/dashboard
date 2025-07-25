@@ -11,9 +11,14 @@ Window {
         id: rpmConn;
     }
 
-    TEMP_INTAKE {
+    TEMPERATURE {
         id: intakeTemp;
         sensorId: "28-01193a3eb5b5";
+    }
+
+    TEMPERATURE {
+        id: housingTemp;
+        sensorId: "28-01144d9b83aa";
     }
 
     function onSignalRPMUpdate() {
@@ -196,7 +201,7 @@ Window {
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: "50"
+                text: housingTemp.temp
             }
 
 

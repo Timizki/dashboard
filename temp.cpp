@@ -15,7 +15,7 @@ TEMP::~TEMP()
 
 QString TEMP::getTEMP()
 {
-    QFile file("/sys/bus/w1/devices/28-01193a3eb5b5/w1_slave"); // Vaihda oikeaan ID:hen
+    QFile file("/sys/bus/w1/devices/"+ TEMP::getSensorId() +"/w1_slave");// Vaihda oikeaan ID:hen
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return "Error";
 
