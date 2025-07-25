@@ -9,7 +9,7 @@
 class TEMP : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString temp READ getTEMP WRITE setTEMP NOTIFY signalTEMPUpdate)
+    Q_PROPERTY(QString temp READ readTEMP WRITE setTEMP NOTIFY signalTEMPUpdate)
     Q_PROPERTY(QString sensorId READ getSensorId WRITE setSensorId NOTIFY signalSensorIdChanged)
     QML_ELEMENT
 

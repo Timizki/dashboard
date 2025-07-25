@@ -14,16 +14,23 @@ Window {
     TEMPERATURE {
         id: intakeTemp;
         sensorId: "28-01193a3eb5b5";
+        signalTEMPUpdate: {
+            intake.text = intakeTemp.temp
+        }
+
     }
 
     TEMPERATURE {
         id: housingTemp;
         sensorId: "28-01144d9b83aa";
+        signalTEMPUpdate: {
+            housing.text = housingTemp.temp
+        }
     }
 
     function onSignalRPMUpdate() {
-                console.log("Received data:",  rpmConn.rpm);
-            rpm.text = rpmConn.rpm;
+        console.log("Received data:",  rpmConn.rpm);
+        rpm.text = rpmConn.rpm;
     }
 
     id: dash
