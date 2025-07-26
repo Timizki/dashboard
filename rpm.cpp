@@ -14,6 +14,7 @@ RPM::RPM(QObject *parent)
     if (!serialPort.open(QIODevice::ReadOnly)) {
         qCritical() << "Failed to open port" << serialPort.portName() << ", error:" << serialPort.errorString();
     }
+
     QObject::connect(&serialPort, &QSerialPort::readyRead, [this]() {
         QByteArray data = RPM::serialPort.readAll();
         bool ok;

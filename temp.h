@@ -32,7 +32,7 @@ public:
 private:
     QString temp;
     QString sensorId;
-    QString readTEMP();
+    QString  readTEMP();
 
 };
 #endif // TEMP_H

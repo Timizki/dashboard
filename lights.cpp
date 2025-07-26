@@ -6,18 +6,18 @@ Lights::Lights(QObject *parent)
     : QObject{parent}
 {
 
-    this->chip = gpiod_chip_open_by_name(chipname);
+    //this->chip = gpiod_chip_open_by_name(chipname);
 
-    this->lineStop = gpiod_chip_get_line(this->chip, 17);
-    this->lineTemperature = gpiod_chip_get_line(this->chip, 27);
-    this->lineOilPressure = gpiod_chip_get_line(this->chip, 22);
-    this->lineBattery = gpiod_chip_get_line(this->chip, 23);
+    //this->lineStop = gpiod_chip_get_line(this->chip, 17);
+    //this->lineTemperature = gpiod_chip_get_line(this->chip, 27);
+    //this->lineOilPressure = gpiod_chip_get_line(this->chip, 22);
+    //this->lineBattery = gpiod_chip_get_line(this->chip, 23);
 
 
-    gpiod_line_request_input(this->lineStop, "dashboard");
-    gpiod_line_request_input(this->lineTemperature, "dashboard");
-    gpiod_line_request_input(this->lineOilPressure, "dashboard");
-    gpiod_line_request_input(this->lineBattery, "dashboard");
+    //gpiod_line_request_input(this->lineStop, "dashboard");
+    //gpiod_line_request_input(this->lineTemperature, "dashboard");
+    //gpiod_line_request_input(this->lineOilPressure, "dashboard");
+    //gpiod_line_request_input(this->lineBattery, "dashboard");
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this,  &Lights::updateStopLight);
@@ -30,10 +30,10 @@ Lights::Lights(QObject *parent)
 Lights::~Lights()
 {
     qDebug() <<"Release lines" ;
-    gpiod_line_release(this->lineStop);
-    gpiod_line_release(this->lineTemperature);
-    gpiod_line_release(this->lineOilPressure);
-    gpiod_line_release(this->lineBattery);
+    //gpiod_line_release(this->lineStop);
+    //gpiod_line_release(this->lineTemperature);
+    //gpiod_line_release(this->lineOilPressure);
+    //gpiod_line_release(this->lineBattery);
     gpiod_chip_close(this->chip);
 }
 
@@ -97,7 +97,7 @@ void Lights::setBatteryState(const bool state)
 int readPin(gpiod_line* line)
 {
 
-    int val = gpiod_line_get_value(line);
+    int val = 0 ;//gpiod_line_get_value(line);
     qDebug() << &"did read gpio value " [ val];
      return val;
 }

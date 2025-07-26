@@ -14,18 +14,11 @@ Window {
     TEMPERATURE {
         id: intakeTemp;
         sensorId: "28-01193a3eb5b5";
-        signalTEMPUpdate: {
-            intake.text = intakeTemp.temp
-        }
-
     }
 
     TEMPERATURE {
         id: housingTemp;
-        sensorId: "28-01144d9b83aa";
-        signalTEMPUpdate: {
-            housing.text = housingTemp.temp
-        }
+        sensorId: "28-01144d9b83aa";        
     }
 
     function onSignalRPMUpdate() {
@@ -187,7 +180,7 @@ Window {
             color: "steelblue"            
 
             Text {
-                id: label_outlet
+                id: label_housing
                 anchors.right: rpmGauge.right
                 anchors.verticalCenter: rpmGauge.verticalCenter
                 anchors.rightMargin: 50
@@ -199,7 +192,7 @@ Window {
                 text: "Housing"
             }
             Text {
-                id: outlet
+                id: housing
                 anchors.verticalCenter: label_outlet.verticalCenter
                 anchors.horizontalCenter: label_outlet.horizontalCenter
                 anchors.top: label_outlet.bottom

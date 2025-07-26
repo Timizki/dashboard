@@ -5,7 +5,9 @@
 TEMP::TEMP(QObject *parent)
     : QObject{parent}
 {
-
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this,  &TEMP::readTEMP);
+    timer->start(1000);
 }
 
 TEMP::~TEMP()
@@ -15,27 +17,13 @@ TEMP::~TEMP()
 
 QString TEMP::getTEMP()
 {
-    QFile file("/sys/bus/w1/devices/"+ TEMP::getSensorId() +"/w1_slave");// Vaihda oikeaan ID:hen
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return "Error";
-
-    QTextStream in(&file);
-    QString content = in.readAll();
-    file.close();
-
-    int index = content.indexOf("t=");
-    if (index != -1) {
-        QString tempString = content.mid(index + 2);
-        double tempC = tempString.toInt() / 1000.0;
-        return QString::number(tempC, 'f', 2) + " °C";
-    }
-    return "Invalid data";
+    return TEMP::temp;
 }
 
-void TEMP::setTEMP(QString temp)
+void TEMP::setTEMP(QString temperature)
 {
-    TEMP::temp= temp;
-    qDebug() <<"Setting temp " << temp;
+    TEMP::temp = temperature;
+    qDebug() <<"Setting temp " << temperature;
     emit TEMP::signalTEMPUpdate();
 
 }
@@ -48,21 +36,26 @@ QString TEMP::getSensorId() {
 }
 
 QString TEMP::readTEMP() {
+
     QFile file("/sys/bus/w1/devices/"+ TEMP::getSensorId() +"/w1_slave");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return "Error";
+    {
+        return QString("Error");
+
+    }
 
     QTextStream in(&file);
     QString content = in.readAll();
     file.close();
 
     int index = content.indexOf("t=");
+
     if (index != -1) {
         QString tempString = content.mid(index + 2);
         double tempC = tempString.toInt() / 1000.0;
         return QString::number(tempC, 'f', 2) + " °C";
     }
-    return "Invalid data";
+    return QString("Invalid value");
 }
 
 void TEMP::updateTEMP()
