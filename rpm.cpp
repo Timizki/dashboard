@@ -59,7 +59,9 @@ void RPM::setRPM(int rpm)
 
 void RPM::updateRPM() {
     qDebug() <<"reading rpm " ;
-    if (!line) return;
+    if (!line)
+
+    return;
 
     bool currentState = gpiod_line_get_value(line);
     if (currentState && !lastState) {
