@@ -193,9 +193,9 @@ Window {
             }
             Text {
                 id: housing
-                anchors.verticalCenter: label_outlet.verticalCenter
-                anchors.horizontalCenter: label_outlet.horizontalCenter
-                anchors.top: label_outlet.bottom
+                anchors.verticalCenter: label_housing.verticalCenter
+                anchors.horizontalCenter: label_housing.horizontalCenter
+                anchors.top: label_housing.bottom
                 font.family: "Helvetica"
                 font.pixelSize: 25
                 font.bold: Font.ExtraBold

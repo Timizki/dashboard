@@ -6,7 +6,7 @@ TEMP::TEMP(QObject *parent)
     : QObject{parent}
 {
     QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this,  &TEMP::readTEMP);
+    connect(timer, &QTimer::timeout, this,  &TEMP::updateTEMP);
     timer->start(1000);
 }
 
