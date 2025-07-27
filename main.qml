@@ -15,7 +15,7 @@ Window {
         interval: 1000
         running: true
         repeat: true
-        onTriggered: console.log("RPM:", sensor.rpm)
+        onTriggered: console.log("RPM:", rpmSensor.rpm)
     }
 
     TEMPERATURE {

@@ -22,13 +22,14 @@ RPM::RPM(QObject *parent)
 RPM::~RPM()
 {
     qDebug() << "Cleaning up RPM";
+    closeGpio();
 
 }
 
 void RPM::initGpio() {
     const char* chipname = "gpiochip0";
     const unsigned int line_num = 17; // GPIO17
-
+qDebug() <<"init rpm " ;
     chip = gpiod_chip_open_by_name(chipname);
     if (!chip) return;
 
@@ -57,6 +58,7 @@ void RPM::setRPM(int rpm)
 }
 
 void RPM::updateRPM() {
+    qDebug() <<"reading rpm " ;
     if (!line) return;
 
     bool currentState = gpiod_line_get_value(line);
