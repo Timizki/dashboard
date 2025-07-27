@@ -8,7 +8,14 @@ Window {
            id: lights
        }
     RPM {
-        id: rpmConn;
+        id: rpmSensor;
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: console.log("RPM:", sensor.rpm)
     }
 
     TEMPERATURE {
@@ -19,11 +26,6 @@ Window {
     TEMPERATURE {
         id: housingTemp;
         sensorId: "28-01144d9b83aa";        
-    }
-
-    function onSignalRPMUpdate() {
-        console.log("Received data:",  rpmConn.rpm);
-        rpm.text = rpmConn.rpm;
     }
 
     id: dash
@@ -114,7 +116,7 @@ Window {
             anchors.left: container.horizontalCenter
             Text {
                 id: rpm
-                text: rpmConn.rpm
+                text: rpmSensor.rpm
                 color: "white"
                 font.family: "Helvetica"
                 font.pixelSize: 50

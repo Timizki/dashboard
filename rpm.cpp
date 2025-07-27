@@ -1,36 +1,48 @@
 #include "rpm.h"
 #include <QDebug>
-
+#include <QTimer>
 
 RPM::RPM(QObject *parent)
-    : QObject{parent}
+    : QObject(parent),
+    timer(new QTimer(this)),
+    rpm(0),
+    pulseCount(0),
+    lastState(false),
+    chip(nullptr),
+    line(nullptr)
 {
-    serialPort.setPortName("/dev/ttyAMA0");
-    serialPort.setBaudRate(QSerialPort::Baud9600);
-    serialPort.setDataBits(QSerialPort::Data8);
-    serialPort.setParity(QSerialPort::NoParity);
-    serialPort.setStopBits(QSerialPort::OneStop);
-    serialPort.setFlowControl(QSerialPort::NoFlowControl);
-    if (!serialPort.open(QIODevice::ReadOnly)) {
-        qCritical() << "Failed to open port" << serialPort.portName() << ", error:" << serialPort.errorString();
-    }
+    initGpio();
 
-    QObject::connect(&serialPort, &QSerialPort::readyRead, [this]() {
-        QByteArray data = RPM::serialPort.readAll();
-        bool ok;
-        int value = data.toFloat(&ok);
-        if(ok)
-            setRPM(value);
-        qDebug() << "Received:" << data;
-    });
+    connect(timer, &QTimer::timeout, this, &RPM::updateRPM);
+    timer->start(10); // Pollausnopeus: 10 ms
+
 }
 
 
 RPM::~RPM()
 {
-    qDebug() << "Cleaning up";
+    qDebug() << "Cleaning up RPM";
 
 }
+
+void RPM::initGpio() {
+    const char* chipname = "gpiochip0";
+    const unsigned int line_num = 17; // GPIO17
+
+    chip = gpiod_chip_open_by_name(chipname);
+    if (!chip) return;
+
+    line = gpiod_chip_get_line(chip, line_num);
+    if (!line) return;
+
+    gpiod_line_request_input(line, "rpmsensor");
+}
+
+void RPM::closeGpio() {
+    if (line) gpiod_line_release(line);
+    if (chip) gpiod_chip_close(chip);
+}
+
 float RPM::getRPM()
 {
     qDebug() <<" seen " << RPM::rpm;
@@ -40,12 +52,29 @@ void RPM::setRPM(int rpm)
 {
     RPM::rpm = rpm;
     qDebug() <<"Setting rpm " << rpm;
-    emit RPM::signalRPMUpdate();
+    emit RPM::RPMUpdated();
 
 }
 
+void RPM::updateRPM() {
+    if (!line) return;
 
-void RPM::updateRPM()
-{
+    bool currentState = gpiod_line_get_value(line);
+    if (currentState && !lastState) {
+        pulseCount++;
+    }
+    lastState = currentState;
 
+    // Lasketaan RPM 1 sekunnin välein
+    static int elapsed = 0;
+    elapsed += 10;
+    if (elapsed >= 1000) {
+        int newRpm = pulseCount * 60;
+        if (newRpm != rpm) {
+            rpm = newRpm;
+            emit RPMUpdated();
+        }
+        pulseCount = 0;
+        elapsed = 0;
+    }
 }
