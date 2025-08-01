@@ -11,12 +11,12 @@ Window {
         id: rpmSensor;
     }
 
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: console.log("RPM:", rpmSensor.rpm)
-    }
+//    Timer {
+//        interval: 1000
+//        running: true
+//        repeat: true
+//        onTriggered: console.log("RPM:", rpmSensor.rpm)
+//    }
 
     TEMPERATURE {
         id: intakeTemp;

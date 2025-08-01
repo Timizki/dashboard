@@ -23,7 +23,7 @@ public:
     explicit RPM(QObject *parent = nullptr);
     ~RPM();
 
-    float getRPM();
+    int getRPM();
     void setRPM(int rpm);
 
 private:
@@ -31,6 +31,7 @@ private:
     int rpm;
     int pulseCount;
     bool lastState;
+    std::chrono::steady_clock::time_point m_lastUpdate;
 
     gpiod_chip* chip;
     gpiod_line* line;

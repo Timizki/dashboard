@@ -12,7 +12,7 @@ RPM::RPM(QObject *parent)
     line(nullptr)
 {
     initGpio();
-
+    m_lastUpdate = std::chrono::steady_clock::now();
     connect(timer, &QTimer::timeout, this, &RPM::updateRPM);
     timer->start(10); // Pollausnopeus: 10 ms
 
@@ -28,7 +28,7 @@ RPM::~RPM()
 
 void RPM::initGpio() {
     const char* chipname = "gpiochip0";
-    const unsigned int line_num = 17; // GPIO17
+    const unsigned int line_num = 14; // GPIO14
 qDebug() <<"init rpm " ;
     chip = gpiod_chip_open_by_name(chipname);
     if (!chip) return;
@@ -36,7 +36,7 @@ qDebug() <<"init rpm " ;
     line = gpiod_chip_get_line(chip, line_num);
     if (!line) return;
 
-    gpiod_line_request_input(line, "rpmsensor");
+    gpiod_line_request_input(line, "rpm");
 }
 
 void RPM::closeGpio() {
@@ -44,7 +44,7 @@ void RPM::closeGpio() {
     if (chip) gpiod_chip_close(chip);
 }
 
-float RPM::getRPM()
+int RPM::getRPM()
 {
     qDebug() <<" seen " << RPM::rpm;
     return RPM::rpm;
@@ -60,25 +60,30 @@ void RPM::setRPM(int rpm)
 void RPM::updateRPM() {
     qDebug() <<"reading rpm " ;
     if (!line)
+    { 
+	    qDebug() << "No RPM line";
+	    return;
+    }
 
-    return;
-
+    qDebug() << "Line found";
     bool currentState = gpiod_line_get_value(line);
+    qDebug() << "current state: " << currentState << " LastState: " << lastState;
     if (currentState && !lastState) {
-        pulseCount++;
+	qDebug() << "RPM state changed";
+	RPM::pulseCount++;
     }
     lastState = currentState;
 
     // Lasketaan RPM 1 sekunnin välein
-    static int elapsed = 0;
-    elapsed += 10;
-    if (elapsed >= 1000) {
-        int newRpm = pulseCount * 60;
-        if (newRpm != rpm) {
-            rpm = newRpm;
-            emit RPMUpdated();
+    auto now = std::chrono::steady_clock::now();
+    qDebug() << std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count() >= 1000) {
+        int newRpm = RPM::pulseCount * 60;
+	qDebug() << "Pulse count = " << RPM::pulseCount;
+        if (newRpm != RPM::getRPM()) {
+	    RPM::setRPM(newRpm);
         }
         pulseCount = 0;
-        elapsed = 0;
+	m_lastUpdate = now;
     }
 }
