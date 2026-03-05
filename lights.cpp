@@ -1,25 +1,28 @@
 #include "lights.h"
-#include "QTimer"
 #include <QDebug>
+#include <QProcessEnvironment>
+
+namespace {
+constexpr int kStopLine = 17;
+constexpr int kTemperatureLine = 27;
+constexpr int kOilPressureLine = 22;
+constexpr int kBatteryLine = 23;
+}
 
 Lights::Lights(QObject *parent)
-    : QObject{parent}
+    : QObject{parent},
+    chip(nullptr),
+    lineStop(nullptr),
+    lineTemperature(nullptr),
+    lineOilPressure(nullptr),
+    lineBattery(nullptr),
+    timer(new QTimer(this))
 {
+    simulationMode = qEnvironmentVariableIntValue("DASHBOARD_SIMULATION") == 1;
+    if (!simulationMode) {
+        initGpio();
+    }
 
-//    this->chip = gpiod_chip_open_by_name(chipname);
-
-//    this->lineStop = gpiod_chip_get_line(this->chip, 17);
-//    this->lineTemperature = gpiod_chip_get_line(this->chip, 27);
-//    this->lineOilPressure = gpiod_chip_get_line(this->chip, 22);
-//    this->lineBattery = gpiod_chip_get_line(this->chip, 23);
-
-
-//    gpiod_line_request_input(this->lineStop, "dashboard");
-//    gpiod_line_request_input(this->lineTemperature, "dashboard");
-//    gpiod_line_request_input(this->lineOilPressure, "dashboard");
-//    gpiod_line_request_input(this->lineBattery, "dashboard");
-
-    QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this,  &Lights::updateStopLight);
     connect(timer, &QTimer::timeout, this,  &Lights::updateOilPressureLight);
     connect(timer, &QTimer::timeout, this,  &Lights::updateTemperatureLight);
@@ -29,12 +32,67 @@ Lights::Lights(QObject *parent)
 
 Lights::~Lights()
 {
-    qDebug() <<"Release lines" ;
-//    gpiod_line_release(this->lineStop);
-//    gpiod_line_release(this->lineTemperature);
-//    gpiod_line_release(this->lineOilPressure);
-//    gpiod_line_release(this->lineBattery);
-//    gpiod_chip_close(this->chip);
+    qDebug() << "Release lines";
+    closeGpio();
+}
+
+void Lights::initGpio()
+{
+    chip = gpiod_chip_open_by_name(chipname);
+    if (!chip) {
+        qWarning() << "GPIO chip not available, enabling simulation mode";
+        simulationMode = true;
+        return;
+    }
+
+    lineStop = gpiod_chip_get_line(chip, kStopLine);
+    lineTemperature = gpiod_chip_get_line(chip, kTemperatureLine);
+    lineOilPressure = gpiod_chip_get_line(chip, kOilPressureLine);
+    lineBattery = gpiod_chip_get_line(chip, kBatteryLine);
+
+    if (!lineStop || !lineTemperature || !lineOilPressure || !lineBattery) {
+        qWarning() << "Failed to acquire one or more GPIO lines, enabling simulation mode";
+        simulationMode = true;
+        closeGpio();
+        return;
+    }
+
+    if (gpiod_line_request_input(lineStop, "dashboard") < 0
+        || gpiod_line_request_input(lineTemperature, "dashboard") < 0
+        || gpiod_line_request_input(lineOilPressure, "dashboard") < 0
+        || gpiod_line_request_input(lineBattery, "dashboard") < 0) {
+        qWarning() << "Failed to request GPIO input lines, enabling simulation mode";
+        simulationMode = true;
+        closeGpio();
+        return;
+    }
+
+    gpioReady = true;
+}
+
+void Lights::closeGpio()
+{
+    if (lineStop) {
+        gpiod_line_release(lineStop);
+        lineStop = nullptr;
+    }
+    if (lineTemperature) {
+        gpiod_line_release(lineTemperature);
+        lineTemperature = nullptr;
+    }
+    if (lineOilPressure) {
+        gpiod_line_release(lineOilPressure);
+        lineOilPressure = nullptr;
+    }
+    if (lineBattery) {
+        gpiod_line_release(lineBattery);
+        lineBattery = nullptr;
+    }
+    if (chip) {
+        gpiod_chip_close(chip);
+        chip = nullptr;
+    }
+    gpioReady = false;
 }
 
 bool Lights::stop()
@@ -94,12 +152,19 @@ void Lights::setBatteryState(const bool state)
 }
 
 
-int readPin(gpiod_line* line)
+int Lights::readPin(gpiod_line *line) const
 {
+    if (simulationMode || !gpioReady || !line) {
+        return 0;
+    }
 
-    int val = 0 ;// gpiod_line_get_value(line);
-    qDebug() << &"did read gpio value " [ val];
-     return val;
+    const int val = gpiod_line_get_value(line);
+    if (val < 0) {
+        qWarning() << "GPIO read failed, returning off state";
+        return 0;
+    }
+
+    return val;
 }
 
 void Lights::updateStopLight()
