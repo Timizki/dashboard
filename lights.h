@@ -4,6 +4,7 @@
 #include "qqml.h"
 #include <QObject>
 #include <gpiod.h>
+#include <QTimer>
 
 class Lights : public QObject
 {
@@ -55,6 +56,14 @@ private:
     struct gpiod_line *lineTemperature;
     struct gpiod_line *lineOilPressure;
     struct gpiod_line *lineBattery;
+
+    QTimer *timer;
+    bool simulationMode = false;
+    bool gpioReady = false;
+
+    void initGpio();
+    void closeGpio();
+    int readPin(gpiod_line *line) const;
 
 
 };
