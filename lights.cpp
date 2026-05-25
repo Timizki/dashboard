@@ -1,6 +1,8 @@
 #include "lights.h"
-#include <QDebug>
 #include <QProcessEnvironment>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
 namespace {
 constexpr int kStopLine = 17;
@@ -32,15 +34,16 @@ Lights::Lights(QObject *parent)
 
 Lights::~Lights()
 {
-    qDebug() << "Release lines";
+    qCDebug(gpioLog) << "Release lines";
     closeGpio();
 }
 
 void Lights::initGpio()
 {
+    qCDebug(gpioLog) << "Initializing lights GPIO on chip" << chipname;
     chip = gpiod_chip_open_by_name(chipname);
     if (!chip) {
-        qWarning() << "GPIO chip not available, enabling simulation mode";
+        qCWarning(gpioLog) << "GPIO chip not available, enabling simulation mode";
         simulationMode = true;
         return;
     }
@@ -51,7 +54,7 @@ void Lights::initGpio()
     lineBattery = gpiod_chip_get_line(chip, kBatteryLine);
 
     if (!lineStop || !lineTemperature || !lineOilPressure || !lineBattery) {
-        qWarning() << "Failed to acquire one or more GPIO lines, enabling simulation mode";
+        qCWarning(gpioLog) << "Failed to acquire one or more GPIO lines, enabling simulation mode";
         simulationMode = true;
         closeGpio();
         return;
@@ -61,7 +64,7 @@ void Lights::initGpio()
         || gpiod_line_request_input(lineTemperature, "dashboard") < 0
         || gpiod_line_request_input(lineOilPressure, "dashboard") < 0
         || gpiod_line_request_input(lineBattery, "dashboard") < 0) {
-        qWarning() << "Failed to request GPIO input lines, enabling simulation mode";
+        qCWarning(gpioLog) << "Failed to request GPIO input lines, enabling simulation mode";
         simulationMode = true;
         closeGpio();
         return;
@@ -159,8 +162,9 @@ int Lights::readPin(gpiod_line *line) const
     }
 
     const int val = gpiod_line_get_value(line);
+    qCDebug(gpioLog) << "Read gpio line" << gpiod_line_offset(line) << "value" << val;
     if (val < 0) {
-        qWarning() << "GPIO read failed, returning off state";
+        qCWarning(gpioLog) << "GPIO read failed, returning off state";
         return 0;
     }
 

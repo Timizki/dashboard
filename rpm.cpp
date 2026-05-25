@@ -1,6 +1,8 @@
 #include "rpm.h"
-#include <QDebug>
 #include <QTimer>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
 RPM::RPM(QObject *parent)
     : QObject(parent),
@@ -21,7 +23,7 @@ RPM::RPM(QObject *parent)
 
 RPM::~RPM()
 {
-    qDebug() << "Cleaning up RPM";
+    qCDebug(gpioLog) << "Cleaning up RPM";
     closeGpio();
 
 }
@@ -29,14 +31,22 @@ RPM::~RPM()
 void RPM::initGpio() {
     const char* chipname = "gpiochip0";
     const unsigned int line_num = 14; // GPIO14
-qDebug() <<"init rpm " ;
+    qCDebug(gpioLog) << "init rpm, chip" << chipname << "line" << line_num;
     chip = gpiod_chip_open_by_name(chipname);
-    if (!chip) return;
+    if (!chip) {
+        qCWarning(gpioLog) << "Failed to open gpio chip" << chipname;
+        return;
+    }
 
     line = gpiod_chip_get_line(chip, line_num);
-    if (!line) return;
+    if (!line) {
+        qCWarning(gpioLog) << "Failed to get rpm gpio line" << line_num;
+        return;
+    }
 
-    gpiod_line_request_input(line, "rpm");
+    if (gpiod_line_request_input(line, "rpm") < 0) {
+        qCWarning(gpioLog) << "Failed to request rpm gpio line as input" << line_num;
+    }
 }
 
 void RPM::closeGpio() {
@@ -46,41 +56,46 @@ void RPM::closeGpio() {
 
 int RPM::getRPM()
 {
-    qDebug() <<" seen " << RPM::rpm;
     return RPM::rpm;
 }
 void RPM::setRPM(int rpm)
 {
     RPM::rpm = rpm;
-    qDebug() <<"Setting rpm " << rpm;
+    qCDebug(gpioLog) << "Setting rpm" << rpm;
     emit RPM::RPMUpdated();
 
 }
 
 void RPM::updateRPM() {
-    qDebug() <<"reading rpm " ;
+    qCDebug(gpioLog) << "reading rpm";
     if (!line)
     { 
-	    qDebug() << "No RPM line";
+	    qCWarning(gpioLog) << "No RPM line";
 	    return;
     }
 
-    qDebug() << "Line found";
-    bool currentState = gpiod_line_get_value(line);
-    qDebug() << "current state: " << currentState << " LastState: " << lastState;
+    qCDebug(gpioLog) << "Line found";
+    const int lineValue = gpiod_line_get_value(line);
+    if (lineValue < 0) {
+        qCWarning(gpioLog) << "Failed to read rpm gpio line";
+        return;
+    }
+
+    const bool currentState = (lineValue != 0);
+    qCDebug(gpioLog) << "current state:" << currentState << "LastState:" << lastState;
     if (currentState && !lastState) {
-	qDebug() << "RPM state changed";
+	qCDebug(gpioLog) << "RPM state changed";
 	RPM::pulseCount++;
     }
     lastState = currentState;
 
     // Lasketaan RPM 1 sekunnin välein
     auto now = std::chrono::steady_clock::now();
-    qDebug() << std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
+    qCDebug(gpioLog) << "elapsed ms" << std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
     if (std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count() >= 1000) {
         int newRpm = RPM::pulseCount * 60;
-	qDebug() << "Pulse count = " << RPM::pulseCount;
-        if (newRpm != RPM::getRPM()) {
+	qCDebug(gpioLog) << "Pulse count =" << RPM::pulseCount;
+        if (newRpm != RPM::rpm) {
 	    RPM::setRPM(newRpm);
         }
         pulseCount = 0;
