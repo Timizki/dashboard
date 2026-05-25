@@ -96,7 +96,8 @@ void RPM::updateRPM() {
         int newRpm = RPM::pulseCount * 60;
 	qCDebug(gpioLog) << "Pulse count =" << RPM::pulseCount;
         if (newRpm != RPM::rpm) {
-	    RPM::setRPM(newRpm);
+		//TODO: Magic number "signal count / revolution" replace it with const
+	    RPM::setRPM(newRpm / 4);
         }
         pulseCount = 0;
 	m_lastUpdate = now;
