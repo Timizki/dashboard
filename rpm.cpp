@@ -4,6 +4,10 @@
 
 Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
+namespace {
+constexpr int kSignalsPerRevolution = 4;
+}
+
 RPM::RPM(QObject *parent)
     : QObject(parent),
     timer(new QTimer(this)),
@@ -96,8 +100,7 @@ void RPM::updateRPM() {
         int newRpm = RPM::pulseCount * 60;
 	qCDebug(gpioLog) << "Pulse count =" << RPM::pulseCount;
         if (newRpm != RPM::rpm) {
-		//TODO: Magic number "signal count / revolution" replace it with const
-	    RPM::setRPM(newRpm / 4);
+            RPM::setRPM(newRpm / kSignalsPerRevolution);
         }
         pulseCount = 0;
 	m_lastUpdate = now;
