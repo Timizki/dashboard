@@ -14,9 +14,9 @@ INCLUDEPATH += .
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += lights.h rpm.h \
+HEADERS += gpio_logger.h lights.h rpm.h \
     temp.h
-SOURCES += lights.cpp main.cpp rpm.cpp \
+SOURCES += gpio_logger.cpp lights.cpp main.cpp rpm.cpp \
     temp.cpp
 RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts

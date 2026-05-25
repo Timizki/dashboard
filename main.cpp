@@ -3,11 +3,10 @@
 
 #include <QLocale>
 #include <QTranslator>
-#include "QDebug"
-#include <QLoggingCategory>
 #include "rpm.h"
 #include "temp.h"
 #include "lights.h"
+#include "gpio_logger.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +19,8 @@ int main(int argc, char *argv[])
     qputenv("QT_ASSUME_STDERR_HAS_CONSOLE", "1");
 
     QGuiApplication app(argc, argv);
+
+    GpioLogger::init();
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
