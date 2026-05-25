@@ -10,6 +10,8 @@
 #include <QStandardPaths>
 #include <QtGlobal>
 
+#include <cstdlib>
+
 Q_LOGGING_CATEGORY(gpioLog, "gpio")
 
 namespace {
@@ -47,6 +49,12 @@ void gpioMessageHandler(QtMsgType type, const QMessageLogContext &context, const
                                  .arg(messageTypeToString(type), category, msg);
         g_logFile->write(line.toUtf8());
     }
+}
+
+
+void gpioShutdownAtExit()
+{
+    GpioLogger::shutdown();
 }
 }
 
@@ -98,7 +106,7 @@ void init()
     QLoggingCategory::setFilterRules(QStringLiteral("gpio*.debug=true\ngpio*.info=true\ngpio*.warning=true\ngpio*.critical=true"));
     g_prevHandler = qInstallMessageHandler(gpioMessageHandler);
     g_handlerInstalled = true;
-    qAddPostRoutine(GpioLogger::shutdown);
+    std::atexit(gpioShutdownAtExit);
     initialized = true;
 }
 
