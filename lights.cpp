@@ -178,7 +178,8 @@ void Lights::updateStopLight()
 
 void Lights::updateOilPressureLight()
 {
-    setOilPressureState(readPin(Lights::lineOilPressure));
+    // Oil pressure input is active-low on the harness: low means warning ON.
+    setOilPressureState(!readPin(Lights::lineOilPressure));
 }
 
 void Lights::updateTemperatureLight()
