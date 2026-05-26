@@ -5,14 +5,14 @@
 #include <QTranslator>
 #include "rpm.h"
 #include "temp.h"
-#include "lights.h"
+#include "warning_signals.h"
 #include "gpio_logger.h"
 
 int main(int argc, char *argv[])
 {
     qmlRegisterType<TEMP>("io.vksn.dashboard", 1, 0, "TEMPERATURE");
     qmlRegisterType<RPM>("io.vksn.dashboard", 1, 0, "RPM");
-    qmlRegisterType<Lights>("io.vksn.dashboard", 1, 0, "Lights");
+    qmlRegisterType<WarningSignals>("io.vksn.dashboard", 1, 0, "WarningSignals");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif    

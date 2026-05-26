@@ -4,7 +4,7 @@ import io.vksn.dashboard 1.0
 import QtQuick.Extras 1.4
 import QtQuick.Controls.Styles 1.4
 Window {
-    Lights {
+    WarningSignals {
            id: lights
        }
     RPM {

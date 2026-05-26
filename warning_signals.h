@@ -1,12 +1,12 @@
-#ifndef LIGHTS_H
-#define LIGHTS_H
+#ifndef WARNING_SIGNALS_H
+#define WARNING_SIGNALS_H
 
 #include "qqml.h"
 #include <QObject>
 #include <gpiod.h>
 #include <QTimer>
 
-class Lights : public QObject
+class WarningSignals : public QObject
 {
 
     Q_OBJECT
@@ -29,10 +29,11 @@ signals:
     void updateOilPressureLight();
     void updateTemperatureLight();
     void updateBatteryLight();
+    void updateShutdownSignal();
 
 public:
-    explicit Lights(QObject *parent = nullptr);
-    ~Lights();
+    explicit WarningSignals(QObject *parent = nullptr);
+    ~WarningSignals();
 
     bool stop();
     bool temperature();
@@ -56,10 +57,13 @@ private:
     struct gpiod_line *lineTemperature;
     struct gpiod_line *lineOilPressure;
     struct gpiod_line *lineBattery;
+    struct gpiod_line *lineShutdown;
 
     QTimer *timer;
     bool simulationMode = false;
     bool gpioReady = false;
+    int shutdownLowSeconds = 0;
+    bool shutdownRequested = false;
 
     void initGpio();
     void closeGpio();
@@ -68,4 +72,4 @@ private:
 
 };
 
-#endif // LIGHTS_H
+#endif // WARNING_SIGNALS_H
