@@ -1,108 +1,82 @@
 #include "rpm.h"
-#include <QTimer>
+
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
 namespace {
+constexpr int kRpmLine = 14;
 constexpr int kSignalsPerRevolution = 4;
+constexpr int kPollIntervalMs = 10;
+constexpr int kRpmWindowMs = 1000;
 }
 
 RPM::RPM(QObject *parent)
-    : QObject(parent),
-    timer(new QTimer(this)),
-    rpm(0),
-    pulseCount(0),
-    lastState(false),
-    chip(nullptr),
-    line(nullptr)
+    : QObject(parent)
 {
     initGpio();
     m_lastUpdate = std::chrono::steady_clock::now();
-    connect(timer, &QTimer::timeout, this, &RPM::updateRPM);
-    timer->start(10); // Pollausnopeus: 10 ms
-
+    connect(&m_timer, &QTimer::timeout, this, &RPM::updateRpm);
+    m_timer.start(kPollIntervalMs);
 }
-
 
 RPM::~RPM()
 {
-    qCDebug(gpioLog) << "Cleaning up RPM";
     closeGpio();
-
 }
 
-void RPM::initGpio() {
-    const char* chipname = "gpiochip0";
-    const unsigned int line_num = 14; // GPIO14
-    qCDebug(gpioLog) << "init rpm, chip" << chipname << "line" << line_num;
-    chip = gpiod_chip_open_by_name(chipname);
-    if (!chip) {
-        qCWarning(gpioLog) << "Failed to open gpio chip" << chipname;
-        return;
-    }
-
-    line = gpiod_chip_get_line(chip, line_num);
-    if (!line) {
-        qCWarning(gpioLog) << "Failed to get rpm gpio line" << line_num;
-        return;
-    }
-
-    if (gpiod_line_request_input(line, "rpm") < 0) {
-        qCWarning(gpioLog) << "Failed to request rpm gpio line as input" << line_num;
-    }
-}
-
-void RPM::closeGpio() {
-    if (line) gpiod_line_release(line);
-    if (chip) gpiod_chip_close(chip);
-}
-
-int RPM::getRPM()
+void RPM::initGpio()
 {
-    return RPM::rpm;
-}
-void RPM::setRPM(int rpm)
-{
-    RPM::rpm = rpm;
-    qCDebug(gpioLog) << "Setting rpm" << rpm;
-    emit RPM::RPMUpdated();
-
-}
-
-void RPM::updateRPM() {
-    qCDebug(gpioLog) << "reading rpm";
-    if (!line)
-    { 
-	    qCWarning(gpioLog) << "No RPM line";
-	    return;
-    }
-
-    qCDebug(gpioLog) << "Line found";
-    const int lineValue = gpiod_line_get_value(line);
-    if (lineValue < 0) {
-        qCWarning(gpioLog) << "Failed to read rpm gpio line";
+    m_chip = gpiod_chip_open_by_name("gpiochip0");
+    if (!m_chip) {
+        qCWarning(gpioLog) << "Failed to open gpio chip";
         return;
     }
+
+    m_line = gpiod_chip_get_line(m_chip, kRpmLine);
+    if (!m_line || gpiod_line_request_input(m_line, "rpm") < 0) {
+        qCWarning(gpioLog) << "Failed to initialize rpm gpio line";
+        closeGpio();
+    }
+}
+
+void RPM::closeGpio()
+{
+    if (m_line) { gpiod_line_release(m_line); m_line = nullptr; }
+    if (m_chip) { gpiod_chip_close(m_chip); m_chip = nullptr; }
+}
+
+int RPM::rpm() const
+{
+    return m_rpm;
+}
+
+void RPM::setRpm(int value)
+{
+    if (m_rpm == value) return;
+    m_rpm = value;
+    emit rpmChanged();
+}
+
+void RPM::updateRpm()
+{
+    if (!m_line) return;
+
+    const int lineValue = gpiod_line_get_value(m_line);
+    if (lineValue < 0) return;
 
     const bool currentState = (lineValue != 0);
-    qCDebug(gpioLog) << "current state:" << currentState << "LastState:" << lastState;
-    if (currentState && !lastState) {
-	qCDebug(gpioLog) << "RPM state changed";
-	RPM::pulseCount++;
+    if (currentState && !m_lastState) {
+        ++m_pulseCount;
     }
-    lastState = currentState;
+    m_lastState = currentState;
 
-    // Lasketaan RPM 1 sekunnin välein
-    auto now = std::chrono::steady_clock::now();
-    qCDebug(gpioLog) << "elapsed ms" << std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count() >= 1000) {
-        int newRpm = RPM::pulseCount * 60;
-	qCDebug(gpioLog) << "Pulse count =" << RPM::pulseCount;
-        if (newRpm != RPM::rpm) {
-            RPM::setRPM(newRpm / kSignalsPerRevolution);
-        }
-        pulseCount = 0;
-	m_lastUpdate = now;
-    }
+    const auto now = std::chrono::steady_clock::now();
+    const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
+    if (elapsedMs < kRpmWindowMs) return;
+
+    const int newRpm = (m_pulseCount * 60) / kSignalsPerRevolution;
+    setRpm(newRpm);
+    m_pulseCount = 0;
+    m_lastUpdate = now;
 }

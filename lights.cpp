@@ -1,5 +1,5 @@
 #include "lights.h"
-#include <QProcessEnvironment>
+
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(gpioLog)
@@ -9,185 +9,114 @@ constexpr int kStopLine = 17;
 constexpr int kTemperatureLine = 27;
 constexpr int kOilPressureLine = 22;
 constexpr int kBatteryLine = 23;
+constexpr int kPollIntervalMs = 1000;
 }
 
 Lights::Lights(QObject *parent)
-    : QObject{parent},
-    chip(nullptr),
-    lineStop(nullptr),
-    lineTemperature(nullptr),
-    lineOilPressure(nullptr),
-    lineBattery(nullptr),
-    timer(new QTimer(this))
+    : QObject(parent)
 {
-    simulationMode = qEnvironmentVariableIntValue("DASHBOARD_SIMULATION") == 1;
-    if (!simulationMode) {
+    if (qEnvironmentVariableIntValue("DASHBOARD_SIMULATION") == 1) {
+        m_simulationMode = true;
+    } else {
         initGpio();
     }
 
-    connect(timer, &QTimer::timeout, this,  &Lights::updateStopLight);
-    connect(timer, &QTimer::timeout, this,  &Lights::updateOilPressureLight);
-    connect(timer, &QTimer::timeout, this,  &Lights::updateTemperatureLight);
-    connect(timer, &QTimer::timeout, this,  &Lights::updateBatteryLight);
-    timer->start(1000);
+    connect(&m_timer, &QTimer::timeout, this, &Lights::updateStates);
+    m_timer.start(kPollIntervalMs);
 }
 
 Lights::~Lights()
 {
-    qCDebug(gpioLog) << "Release lines";
     closeGpio();
+}
+
+bool Lights::stop() const { return m_stopState; }
+bool Lights::temperature() const { return m_temperatureState; }
+bool Lights::oilPressure() const { return m_oilPressureState; }
+bool Lights::battery() const { return m_batteryState; }
+
+void Lights::setStopState(bool state)
+{
+    if (state == m_stopState) return;
+    m_stopState = state;
+    emit stopStateChanged();
+}
+
+void Lights::setTemperatureState(bool state)
+{
+    if (state == m_temperatureState) return;
+    m_temperatureState = state;
+    emit temperatureStateChanged();
+}
+
+void Lights::setOilPressureState(bool state)
+{
+    if (state == m_oilPressureState) return;
+    m_oilPressureState = state;
+    emit oilPressureStateChanged();
+}
+
+void Lights::setBatteryState(bool state)
+{
+    if (state == m_batteryState) return;
+    m_batteryState = state;
+    emit batteryStateChanged();
+}
+
+void Lights::updateStates()
+{
+    setStopState(readPin(m_lineStop));
+    setTemperatureState(readPin(m_lineTemperature));
+    setOilPressureState(!readPin(m_lineOilPressure)); // active-low
+    setBatteryState(readPin(m_lineBattery));
 }
 
 void Lights::initGpio()
 {
-    qCDebug(gpioLog) << "Initializing lights GPIO on chip" << chipname;
-    chip = gpiod_chip_open_by_name(chipname);
-    if (!chip) {
+    m_chip = gpiod_chip_open_by_name(m_chipName);
+    if (!m_chip) {
         qCWarning(gpioLog) << "GPIO chip not available, enabling simulation mode";
-        simulationMode = true;
+        m_simulationMode = true;
         return;
     }
 
-    lineStop = gpiod_chip_get_line(chip, kStopLine);
-    lineTemperature = gpiod_chip_get_line(chip, kTemperatureLine);
-    lineOilPressure = gpiod_chip_get_line(chip, kOilPressureLine);
-    lineBattery = gpiod_chip_get_line(chip, kBatteryLine);
+    m_lineStop = gpiod_chip_get_line(m_chip, kStopLine);
+    m_lineTemperature = gpiod_chip_get_line(m_chip, kTemperatureLine);
+    m_lineOilPressure = gpiod_chip_get_line(m_chip, kOilPressureLine);
+    m_lineBattery = gpiod_chip_get_line(m_chip, kBatteryLine);
 
-    if (!lineStop || !lineTemperature || !lineOilPressure || !lineBattery) {
-        qCWarning(gpioLog) << "Failed to acquire one or more GPIO lines, enabling simulation mode";
-        simulationMode = true;
+    if (!m_lineStop || !m_lineTemperature || !m_lineOilPressure || !m_lineBattery
+        || gpiod_line_request_input(m_lineStop, "dashboard") < 0
+        || gpiod_line_request_input(m_lineTemperature, "dashboard") < 0
+        || gpiod_line_request_input(m_lineOilPressure, "dashboard") < 0
+        || gpiod_line_request_input(m_lineBattery, "dashboard") < 0) {
+        qCWarning(gpioLog) << "Failed to initialize GPIO lines, enabling simulation mode";
+        m_simulationMode = true;
         closeGpio();
         return;
     }
 
-    if (gpiod_line_request_input(lineStop, "dashboard") < 0
-        || gpiod_line_request_input(lineTemperature, "dashboard") < 0
-        || gpiod_line_request_input(lineOilPressure, "dashboard") < 0
-        || gpiod_line_request_input(lineBattery, "dashboard") < 0) {
-        qCWarning(gpioLog) << "Failed to request GPIO input lines, enabling simulation mode";
-        simulationMode = true;
-        closeGpio();
-        return;
-    }
-
-    gpioReady = true;
+    m_gpioReady = true;
 }
 
 void Lights::closeGpio()
 {
-    if (lineStop) {
-        gpiod_line_release(lineStop);
-        lineStop = nullptr;
-    }
-    if (lineTemperature) {
-        gpiod_line_release(lineTemperature);
-        lineTemperature = nullptr;
-    }
-    if (lineOilPressure) {
-        gpiod_line_release(lineOilPressure);
-        lineOilPressure = nullptr;
-    }
-    if (lineBattery) {
-        gpiod_line_release(lineBattery);
-        lineBattery = nullptr;
-    }
-    if (chip) {
-        gpiod_chip_close(chip);
-        chip = nullptr;
-    }
-    gpioReady = false;
+    if (m_lineStop) { gpiod_line_release(m_lineStop); m_lineStop = nullptr; }
+    if (m_lineTemperature) { gpiod_line_release(m_lineTemperature); m_lineTemperature = nullptr; }
+    if (m_lineOilPressure) { gpiod_line_release(m_lineOilPressure); m_lineOilPressure = nullptr; }
+    if (m_lineBattery) { gpiod_line_release(m_lineBattery); m_lineBattery = nullptr; }
+    if (m_chip) { gpiod_chip_close(m_chip); m_chip = nullptr; }
+    m_gpioReady = false;
 }
-
-bool Lights::stop()
-{
-    return this->stopState;
-}
-
-bool Lights::temperature()
-{
-    return this->temperatureState;
-}
-
-
-bool Lights::oilPressure()
-{
-    return this->oilPressureState;
-}
-
-bool Lights::battery()
-{
-    return this->batteryState;
-}
-
-void Lights::setStopState(const bool state)
-{
-    if (state == this->stopState)
-        return;
-
-    this->stopState = state;
-    emit stopStateChanged();
-}
-
-void Lights::setTemperatureState(const bool state)
-{
-    if (state == this->temperatureState)
-            return;
-   this->temperatureState = state;
-   emit temperatureStateChanged();
-}
-
-
-void Lights::setOilPressureState(const bool state)
-{
-    if (state == this->oilPressureState)
-        return;
-   this->oilPressureState = state;
-   emit oilPressureStateChanged();
-}
-
-
-void Lights::setBatteryState(const bool state)
-{
-    if (state == batteryState)
-        return;
-    batteryState = state;
-    emit batteryStateChanged();
-}
-
 
 int Lights::readPin(gpiod_line *line) const
 {
-    if (simulationMode || !gpioReady || !line) {
-        return 0;
-    }
+    if (m_simulationMode || !m_gpioReady || !line) return 0;
 
     const int val = gpiod_line_get_value(line);
-    qCDebug(gpioLog) << "Read gpio line" << gpiod_line_offset(line) << "value" << val;
     if (val < 0) {
         qCWarning(gpioLog) << "GPIO read failed, returning off state";
         return 0;
     }
-
     return val;
-}
-
-void Lights::updateStopLight()
-{
-    setStopState(readPin(Lights::lineStop));
-}
-
-void Lights::updateOilPressureLight()
-{
-    // Oil pressure input is active-low on the harness: low means warning ON.
-    setOilPressureState(!readPin(Lights::lineOilPressure));
-}
-
-void Lights::updateTemperatureLight()
-{
-    setTemperatureState(readPin(Lights::lineTemperature));
-}
-
-void Lights:: updateBatteryLight()
-{
-    setBatteryState(readPin(Lights::lineBattery));
 }

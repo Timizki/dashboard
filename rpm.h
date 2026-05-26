@@ -1,44 +1,43 @@
 #ifndef RPM_H
 #define RPM_H
 
-#include "qqml.h"
 #include <QObject>
 #include <QTimer>
+#include <chrono>
 #include <gpiod.h>
+#include "qqml.h"
 
 class RPM : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(float rpm READ getRPM WRITE setRPM  NOTIFY RPMUpdated)
+    Q_PROPERTY(float rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
     QML_ELEMENT
-
-signals:
-    void RPMUpdated();
-
-public slots:
-    void updateRPM();
-
 
 public:
     explicit RPM(QObject *parent = nullptr);
-    ~RPM();
+    ~RPM() override;
 
-    int getRPM();
-    void setRPM(int rpm);
+    int rpm() const;
+    void setRpm(int value);
+
+signals:
+    void rpmChanged();
+
+private slots:
+    void updateRpm();
 
 private:
-    QTimer* timer;
-    int rpm;
-    int pulseCount;
-    bool lastState;
-    std::chrono::steady_clock::time_point m_lastUpdate;
-
-    gpiod_chip* chip;
-    gpiod_line* line;
-
-    int readRPM();
     void initGpio();
     void closeGpio();
 
+    QTimer m_timer;
+    int m_rpm = 0;
+    int m_pulseCount = 0;
+    bool m_lastState = false;
+    std::chrono::steady_clock::time_point m_lastUpdate;
+
+    gpiod_chip *m_chip = nullptr;
+    gpiod_line *m_line = nullptr;
 };
+
 #endif // RPM_H
