@@ -15,9 +15,9 @@ INCLUDEPATH += .
 
 # Input
 HEADERS += gpio_logger.h lights.h rpm.h \
-    temp.h
+    temperature_sensor.h
 SOURCES += gpio_logger.cpp lights.cpp main.cpp rpm.cpp \
-    temp.cpp
+    temperature_sensor.cpp
 RESOURCES += qml.qrc
 TRANSLATIONS += dashboard_fi_FI.ts
 QT += qml serialport

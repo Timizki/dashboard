@@ -203,7 +203,7 @@ Window {
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: housingTemp.temp
+                text: housingTemp.temperature
             }
 
 
@@ -229,7 +229,7 @@ Window {
                 font.bold: Font.ExtraBold
                 font.capitalization: Font.AllUppercase
                 color: "white"
-                text: intakeTemp.temp
+                text: intakeTemp.temperature
             }
 
 
