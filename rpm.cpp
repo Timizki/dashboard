@@ -18,6 +18,7 @@ RPM::RPM(QObject *parent)
     m_lastUpdate = std::chrono::steady_clock::now();
     connect(&m_timer, &QTimer::timeout, this, &RPM::updateRpm);
     m_timer.start(kPollIntervalMs);
+    qCDebug(gpioLog) << "RPM construction passed";
 }
 
 RPM::~RPM()
@@ -53,7 +54,12 @@ int RPM::rpm() const
 
 void RPM::setRpm(int value)
 {
-    if (m_rpm == value) return;
+    if (m_rpm == value) {
+        qCDebug(gpioLog) << "RPM value unchanged" << value;
+        return;
+    }
+
+    qCDebug(gpioLog) << "RPM value changed from" << m_rpm << "to" << value;
     m_rpm = value;
     emit rpmChanged();
 }
