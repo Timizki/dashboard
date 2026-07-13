@@ -5,7 +5,7 @@
 Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
 namespace {
-constexpr int kRpmLine = 14;
+constexpr int kRpmLine = 15;
 constexpr int kSignalsPerRevolution = 4;
 constexpr int kPollIntervalMs = 10;
 constexpr int kRpmWindowMs = 1000;
