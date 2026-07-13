@@ -42,12 +42,18 @@ void gpioMessageHandler(QtMsgType type, const QMessageLogContext &context, const
         return;
     }
 
-    QMutexLocker locker(&g_logMutex);
-    if (g_logFile && g_logFile->isOpen()) {
-        const QString line = QStringLiteral("%1 [%2] [%3] %4\n")
-                                 .arg(QDateTime::currentDateTime().toString(Qt::ISODateWithMs))
-                                 .arg(messageTypeToString(type), category, msg);
-        g_logFile->write(line.toUtf8());
+    {
+        QMutexLocker locker(&g_logMutex);
+        if (g_logFile && g_logFile->isOpen()) {
+            const QString line = QStringLiteral("%1 [%2] [%3] %4\n")
+                                     .arg(QDateTime::currentDateTime().toString(Qt::ISODateWithMs))
+                                     .arg(messageTypeToString(type), category, msg);
+            g_logFile->write(line.toUtf8());
+        }
+    }
+
+    if (g_prevHandler) {
+        g_prevHandler(type, context, msg);
     }
 }
 
