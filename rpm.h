@@ -2,6 +2,7 @@
 #define RPM_H
 
 #include <QObject>
+#include <QSocketNotifier>
 #include <QTimer>
 #include <chrono>
 #include <gpiod.h>
@@ -24,6 +25,7 @@ signals:
     void rpmChanged();
 
 private slots:
+    void handleGpioEvent();
     void updateRpm();
 
 private:
@@ -31,9 +33,9 @@ private:
     void closeGpio();
 
     QTimer m_timer;
+    QSocketNotifier *m_gpioNotifier = nullptr;
     int m_rpm = 0;
     int m_pulseCount = 0;
-    bool m_lastState = false;
     std::chrono::steady_clock::time_point m_lastUpdate;
 
     gpiod_chip *m_chip = nullptr;
