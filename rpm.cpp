@@ -8,7 +8,7 @@
 Q_DECLARE_LOGGING_CATEGORY(gpioLog)
 
 namespace {
-constexpr int kRpmLine = 15; // BCM GPIO15, not physical pin 15.
+constexpr int kRpmLine = 14; // BCM GPIO14, not physical pin 14.
 constexpr int kSignalsPerRevolution = 4;
 constexpr int kRpmWindowMs = 1000;
 }
